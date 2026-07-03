@@ -88,17 +88,27 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 pip install pyinstaller
-pyinstaller --noconfirm --clean build.spec
+python -m PyInstaller --noconfirm --clean build.spec
 ```
 
 ### macOS 打包（可选）
 
 ```bash
 pip install pyinstaller
-pyinstaller --noconfirm --clean build.spec
+python3 -m PyInstaller --noconfirm --clean build.spec
 ```
 
-产物位于 `dist/AndroidKeystoreDecoder/`。
+产物位于 `dist/AndroidKeystoreDecoder.app`，**双击 `.app` 即可打开**（不会弹出终端）。
+
+若仍提示无法打开，可执行：
+
+```bash
+xattr -cr dist/AndroidKeystoreDecoder.app
+```
+
+> 请勿双击 `dist/AndroidKeystoreDecoder/AndroidKeystoreDecoder` 裸可执行文件，那是给调试用的，双击会短暂打开终端后退出。
+>
+> 若提示 `command not found: pyinstaller`，请改用 `python3 -m PyInstaller`（Windows 下为 `python -m PyInstaller`）。
 
 ## 给同事验证时的注意事项
 

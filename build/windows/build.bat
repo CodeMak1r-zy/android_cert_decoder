@@ -13,7 +13,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 pip install pyinstaller
 
-pyinstaller --noconfirm --clean build.spec
+python -m PyInstaller --noconfirm --clean build.spec
 
 echo.
 echo Build finished.

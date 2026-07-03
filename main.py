@@ -4,8 +4,6 @@ import os
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
-from tkinterdnd2 import COPY, DND_FILES, TkinterDnD
-
 from keystore_parser import CertInfo, KeystoreError, parse_keystore
 
 
@@ -78,7 +76,7 @@ class PasswordDialog(tk.Toplevel):
         self.destroy()
 
 
-class App(TkinterDnD.Tk):
+class App(tk.Tk):
     def __init__(self) -> None:
         super().__init__()
         self.title("Android Keystore Decoder")
@@ -87,9 +85,19 @@ class App(TkinterDnD.Tk):
         self._drop_zone_default_bg = "#f5f5f5"
         self._drop_zone_active_bg = "#e8f0fe"
         self._pending_drop_after: str | None = None
+        self._dnd_enabled = self._enable_dnd()
 
         self._build_ui()
         self._center_window()
+
+    def _enable_dnd(self) -> bool:
+        try:
+            from tkinterdnd2 import TkinterDnD
+
+            TkinterDnD._require(self)
+            return True
+        except (ImportError, RuntimeError, tk.TclError, AttributeError):
+            return False
 
     def _center_window(self) -> None:
         self.update_idletasks()
@@ -155,10 +163,13 @@ class App(TkinterDnD.Tk):
 
         ttk.Button(file_frame, text="选择 .keystore 文件", command=self._select_file).pack(anchor=tk.W)
 
-        self._register_drop_target(self.drop_zone)
-        self._register_drop_target(drop_inner)
-        self._register_drop_target(self.drop_hint_label)
-        self._register_drop_target(self.file_path_label)
+        if self._dnd_enabled:
+            self._register_drop_target(self.drop_zone)
+            self._register_drop_target(drop_inner)
+            self._register_drop_target(self.drop_hint_label)
+            self._register_drop_target(self.file_path_label)
+        else:
+            self.drop_hint_label.configure(text="点击上方按钮选择 .keystore 文件")
 
         result_frame = ttk.LabelFrame(container, text="解析结果", padding=12)
         result_frame.pack(fill=tk.BOTH, expand=True)
@@ -195,12 +206,21 @@ class App(TkinterDnD.Tk):
         return sys.platform == "darwin"
 
     def _register_drop_target(self, widget: tk.Misc) -> None:
+        from tkinterdnd2 import DND_FILES
+
         widget.drop_target_register(DND_FILES)
         widget.dnd_bind("<<Drop>>", self._on_drop)
         widget.dnd_bind("<<DragEnter>>", self._on_drag_enter)
         widget.dnd_bind("<<DragLeave>>", self._on_drag_leave)
 
+    def _dnd_action(self) -> str:
+        from tkinterdnd2 import COPY
+
+        return COPY
+
     def _set_drop_zone_active(self, active: bool) -> None:
+        if not self._dnd_enabled:
+            return
         bg = self._drop_zone_active_bg if active else self._drop_zone_default_bg
         for widget in (self.drop_zone, self.drop_hint_label, self.file_path_label):
             widget.configure(bg=bg)
@@ -209,22 +229,22 @@ class App(TkinterDnD.Tk):
 
     def _on_drag_enter(self, _event: tk.Event) -> str:
         self._set_drop_zone_active(True)
-        return COPY
+        return self._dnd_action()
 
     def _on_drag_leave(self, _event: tk.Event) -> str:
         self._set_drop_zone_active(False)
-        return COPY
+        return self._dnd_action()
 
     def _on_drop(self, event: tk.Event) -> str:
         self._set_drop_zone_active(False)
         paths = self.tk.splitlist(event.data)
         if not paths:
-            return COPY
+            return self._dnd_action()
         path = self._normalize_dropped_path(paths[0])
         if self._pending_drop_after is not None:
             self.after_cancel(self._pending_drop_after)
         self._pending_drop_after = self.after(0, lambda: self._process_keystore(path))
-        return COPY
+        return self._dnd_action()
 
     @staticmethod
     def _normalize_dropped_path(raw: str) -> str:
@@ -326,16 +346,7 @@ class App(TkinterDnD.Tk):
 
 
 def main() -> None:
-    try:
-        app = App()
-    except RuntimeError as exc:
-        tk.Tk().withdraw()
-        messagebox.showerror(
-            "启动失败",
-            "拖放组件加载失败，请执行：\n\npip install 'tkinterdnd2==0.4.2'\n\n"
-            f"详情：{exc}",
-        )
-        return
+    app = App()
     app.mainloop()
 
 

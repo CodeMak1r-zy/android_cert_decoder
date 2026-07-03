@@ -1,5 +1,7 @@
-# PyInstaller spec: run on Windows with
-#   pyinstaller build.spec
+# PyInstaller spec
+#   python3 -m PyInstaller --noconfirm --clean build.spec
+
+import sys
 
 from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
@@ -14,6 +16,7 @@ hiddenimports = collect_submodules("jks") + [
     "pyasn1",
     "pyasn1_modules",
     "twofish",
+    "tkinterdnd2",
 ]
 
 a = Analysis(
@@ -62,3 +65,15 @@ coll = COLLECT(
     upx_exclude=[],
     name="AndroidKeystoreDecoder",
 )
+
+if sys.platform == "darwin":
+    app = BUNDLE(
+        coll,
+        name="AndroidKeystoreDecoder.app",
+        icon=None,
+        bundle_identifier="com.android.keystore.decoder",
+        info_plist={
+            "NSHighResolutionCapable": True,
+            "CFBundleName": "Android Keystore Decoder",
+        },
+    )
