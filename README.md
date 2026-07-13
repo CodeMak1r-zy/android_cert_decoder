@@ -112,13 +112,6 @@ xattr -cr dist/AndroidKeystoreDecoder.app
 >
 > 若提示 `command not found: pyinstaller`，请改用 `python3 -m PyInstaller`（Windows 下为 `python -m PyInstaller`）。
 
-## 给同事验证时的注意事项
-
-- 使用 **storepass**，不是 keypass
-- 分发时使用整个 `AndroidKeystoreDecoder` 文件夹，不要只发 exe
-- 未签名的 exe 可能触发 Windows SmartScreen，选择「仍要运行」即可
-- 若拖入文件后界面无响应，请确认使用的是最新代码（拖放回调已做延迟处理，避免 macOS 卡死）
-
 ## 项目结构
 
 ```
