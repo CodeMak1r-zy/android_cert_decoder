@@ -7,7 +7,7 @@ from PyInstaller.utils.hooks import collect_data_files, collect_submodules
 
 block_cipher = None
 
-hiddenimports = collect_submodules("jks") + [
+hiddenimports = collect_submodules("jks") + collect_submodules("customtkinter") + [
     "Cryptodome",
     "Cryptodome.Cipher",
     "Cryptodome.Hash",
@@ -17,13 +17,15 @@ hiddenimports = collect_submodules("jks") + [
     "pyasn1_modules",
     "twofish",
     "tkinterdnd2",
+    "customtkinter",
+    "darkdetect",
 ]
 
 a = Analysis(
     ["main.py"],
     pathex=[],
     binaries=[],
-    datas=collect_data_files("tkinterdnd2"),
+    datas=collect_data_files("tkinterdnd2") + collect_data_files("customtkinter"),
     hiddenimports=hiddenimports,
     hookspath=["."],
     hooksconfig={},

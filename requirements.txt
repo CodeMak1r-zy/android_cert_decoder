@@ -2,3 +2,4 @@ pyjks>=20.0.0
 cryptography>=42.0.0
 # 0.5.x ships Tcl 9 binaries; pyenv/homebrew Python uses Tcl 8.6
 tkinterdnd2==0.4.2
+customtkinter>=5.2.0

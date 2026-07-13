@@ -9,7 +9,7 @@ import jks
 from jks.bks import KEY_TYPE_PRIVATE
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.serialization import pkcs12
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat, pkcs12
 
 
 @dataclass
@@ -22,6 +22,7 @@ class CertInfo:
     issuer: str
     not_before: datetime
     not_after: datetime
+    public_key_pem: str
 
 
 class KeystoreError(Exception):
@@ -38,6 +39,11 @@ def _dn_string(name: x509.Name) -> str:
         return ", ".join(f"{attr.oid._name}={attr.value}" for attr in name)
 
 
+def _public_key_pem(cert: x509.Certificate) -> str:
+    # Equivalent to: openssl x509 -pubkey -noout
+    return cert.public_key().public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo).decode("ascii")
+
+
 def _cert_info(alias: str, cert: x509.Certificate) -> CertInfo:
     return CertInfo(
         alias=alias,
@@ -48,6 +54,7 @@ def _cert_info(alias: str, cert: x509.Certificate) -> CertInfo:
         issuer=_dn_string(cert.issuer),
         not_before=cert.not_valid_before_utc.replace(tzinfo=timezone.utc),
         not_after=cert.not_valid_after_utc.replace(tzinfo=timezone.utc),
+        public_key_pem=_public_key_pem(cert),
     )
 
 

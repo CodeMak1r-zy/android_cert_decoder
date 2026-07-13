@@ -7,7 +7,8 @@
 - 选择或拖入 `.keystore` 文件
 - 输入 **storepass** 解析证书
 - 展示 SHA256、SHA1、MD5、Subject、Issuer、有效期
-- 一键复制指纹
+- 展示证书公钥（PEM 格式，等价于 `keytool -exportcert | openssl x509 -pubkey -noout` 的结果），无需安装 keytool / openssl
+- 一键复制指纹与公钥
 
 ## 支持的 Keystore 格式
 
@@ -29,6 +30,7 @@ python main.py
 - `pyjks` + `cryptography`：纯 Python 解析 keystore，无需安装 Java
 - `tkinterdnd2==0.4.2`：文件拖放支持
   - **注意**：请勿升级到 `0.5.x`，该版本在 pyenv / Homebrew Python（Tcl 8.6）下会因二进制不兼容而启动失败
+- `customtkinter`：界面样式（圆角卡片、浅色/深色主题切换）
 
 ## 使用说明
 
